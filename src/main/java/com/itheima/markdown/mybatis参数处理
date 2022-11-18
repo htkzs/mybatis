@@ -1,0 +1,119 @@
+单个参数:mybatis不会做特殊处理，
+     #{参数名}:取出参数值。 参数名可以不和方法的形参名字一致
+多个参数:mybatis会做特殊处理。
+     多个参数会被封装成一个map,
+     key: param1. ..paramN,或者参数的索引也可以
+     value:传入的参数值
+     #{}就是从map中获取指定的key的值;
+
+     传递参数 Student student = mapper.selectStudentByIdAndName(1, "zhangsan");
+     接收参数  select* from student where id=#{id} and name=#{name}
+     报如下异常:
+     org.apache.ibatis.binding.BindingException: Parameter 'id' not found. Available parameters are [arg1, arg0, param1, param2]
+
+     修改方式：
+     1.select* from student where id=#{param1} and name=#{param2}
+     2.select* from student where id=#{arg0} and name=#{arg1}
+     3.命名参数:明确指定封装参数时map的key;@Param( "id")
+       多个参数会被封装成一个map,
+       key:使用@Param注解指定的值
+       value:参数值
+       通过#{指定的key}取值
+     指定key: Student selectStudentByIdAndName(@Param("id") Integer id, @Param("name") String name);
+     根据key取值：select* from student where id=#{id} and name=#{name}
+POJ0:
+如果多个参数正好是我们业务逻辑的数据模型，我们就可以直接传入pojo;
+#{属性名}:取出传入的pojo的属性值
+Map:
+如果多个参数不是业务模型中的数据，没有对应的pojo，为了方便，我们也可以传入map
+#{key}:取出map中对应的值
+
+如果多个参数不是业务模型中的数据，但是经常要使用，推荐来编写一个TO(Transfer 0bject)数据传输对象
+page{
+   int index;
+   int size;
+}
+
+
+public Employee getEmp(@Param( "id" )Integer id,string lastName);
+取值: id==>#{id/param1}lastName==>#{param2]
+public Employee getEmp(Integer id,@Param("e" )Employee emp);
+取值: id==>#{param1}lastName===>#{param2.lastName/e.lastName}
+##特别注意:如果是Collection(List、Set）类型或者是数组，也会特殊处理。也是把传入的list或者数组封装在map中
+key: collection (collection）,如果是List还可以使用这个key(list) 数组(array)
+public Employee getEmpById(List<Integer> ids );
+取值:取出第一个id的值:
+    使用 #{ ids[e]}不可以 必须使用#{list[0]}
+
+参数转换
+selectStudentByIdAndName(@Param("id") Integer id, @Param("name") String name)
+args {1=id,2=name,3=3}
+    1.获取每个标了param注解的参数的@param值:id，name
+    2.每次解析一个参数给map中保存信息:(key:参数索引，value: name的值)
+         没有标注:
+         1.全局配置:useActualParamName (jdk1.8) : name=参数名
+         2.name=map.size()
+args[1,"zhangsan"]:
+public Object getNamedParams(Object[] args) {
+    final int paramCount = names.size();
+    //如果参数为null，直接返回
+    if (args == null || paramCount == 0) {
+      return null;
+      //如果只有一个元素，并且没有@param注解：args[0]:单个参数元素
+    } else if (!hasParamAnnotation && paramCount == 1) {
+      return args[names.firstKey()];
+      //多个元素
+    } else {
+      final Map<String, Object> param = new ParamMap<>();
+      int i = 0;
+      //遍历names集合：{0=id,1=name}  names集合的key又作为取值的参考args[0]args【1,"Tom"】
+      for (Map.Entry<Integer, String> entry : names.entrySet()) {
+        param.put(entry.getValue(), args[entry.getKey()]);
+        // add generic param names (param1, param2, ...)
+        final String genericParamName = GENERIC_NAME_PREFIX + String.valueOf(i + 1);
+        // ensure not to overwrite parameter named with @Param
+        if (!names.containsValue(genericParamName)) {
+          param.put(genericParamName, args[entry.getKey()]);
+        }
+        i++;
+      }
+      return param;
+    }
+  }
+
+参数值的获取:
+#{}:可以获取map中的值或者pojo对象属性的值;
+${}:可以获取map中的值或者pojo对象属性的值;
+    #{}:是以预编译的形式，将参数设置到sql语句中;PreparedStatement;可以防止SQL注入
+    $(:取出的值直接拼装在sql语句中,会有安全问题;
+    原生jdbc不支持占位符的地方我们就可以使用${(}进行取值比如分表;按照年份分表拆分
+    select * from ${year}_salary where xXX;
+    select * from tbl_employee order by $if_name} ${order} 原生JDBC不支持占位符的操作
+
+#{}:更丰富的用法:
+规定参数的一些规则:
+javaType、 jdbcType、 mode（存储过程)、numericscale、resultMap. typeHandler、jdbcTypeName、expression
+
+jdbcType通常需要在某种特定的条件下被设置:
+在我们数据为null的时候，有些数据库可能不能识别mybatis对null的默认处理。
+比如Oracle(报错jdbcType OTHER:无效的类型;
+因为mybatis对所有的null都映射的是原生Jdbc的OTHER类型,Oracle不能识别other类型，而mysql兼容
+
+由于全局配置中:jdbcTypeForNull=OTHER: oracle不支持;
+1、#{email ,jdbcType=OTHER};
+
+<insert id="insertStudentNullWithOracle" parameterType="Student">
+        <!--首先处理Oracle不支持主键自增的情况-->
+        <selectKey keyProperty="id" resultType="int" order="BEFORE">
+            select STUDENT_SEQ.nextval from dual;
+        </selectKey>
+        <!--当name字段为null时 我们指定他的javaType为NULL-->
+        insert into student(id,name,age,sex) values (#{id},#{name,javaType=NULL},#{age},#{sex})
+    </insert>
+
+2、jdbcTypeForNu1l=NULL
+   全局设置
+   <setting name="jdbcTypeForNull" value="NULL"/>
+
+
+

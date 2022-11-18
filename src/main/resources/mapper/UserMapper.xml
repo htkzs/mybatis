@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.mapper.UserMapper">
+
+    <!--开启二级缓存 整合第三方ehcache使用-->
+    <cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
+
+
+    <select id="getUser" resultType="User" parameterType="Integer" databaseId="mysql">
+       select * from user where id= #{userId}
+    </select>
+    <!--通过databaseId标识一个SQL支持oracle数据库-->
+    <select id="getUser" resultType="User" parameterType="Integer" databaseId="oracle">
+        select id,name,age from user where id= #{userId}
+    </select>
+
+    <select id="getAllUser" resultType="User">
+        select * from user;
+    </select>
+
+    <delete id="deleteUserById" parameterType="Integer">
+        delete from user where id=#{userId}
+    </delete>
+    <!--查询oracle数据库插入一条数据，获取到插入数据的主键值-->
+    <insert id="addUser" databaseId="oracle" parameterType="User">
+        <!--keyProperty：将获取到的值保存在实体类的那个字段中
+            order; BEFORE|AFTER
+            BEFORE运行顺序:
+            先运行selectkey查询id的sql;查出id值封装给javaBean的id属性在运行插入的sql;就可以取出id属性对应的值
+            AFTER运行顺序:
+            先运行插入的sql（从序列中取出新值作为id) ;再运行selectKey查询id的sql;
+        -->
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select USER_SEQ.currval from dual;
+        </selectKey>
+
+        insert into user(id,name,age) values(USER_SEQ.currval,#{name},#{age})
+    </insert>
+
+</mapper>

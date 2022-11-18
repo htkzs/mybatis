@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.mapper.AddressMapper">
+    <!--分步查询的第二步 -->
+    <select id="queryAddressById" resultType="com.itheima.entity.Address">
+        select address_id addressId,province,city,town from address where address_id=#{id}
+    </select>
+
+    <resultMap id="AddressPlus" type="com.itheima.entity.Address">
+        <id column="address_id" property="addressId"/>
+        <result column="province" property="province"/>
+        <result column="city" property="city"/>
+        <result column="town" property="town"/>
+        <!--嵌套结果集的方式,使用collection标签定义关联的集合类型的属性封装规则
+             collection定义关联集合类型的属性的封装规则
+             ofType:指定集合里面元素的类型
+         -->
+        <collection property="persons" ofType="com.itheima.entity.Person">
+            <id column="no" property="no"/>
+            <result column="name" property="name"/>
+            <result column="age" property="age"/>
+            <result column="height" property="height"/>
+        </collection>
+    </resultMap>
+
+    <select id="queryAddressByIdPlus" parameterType="java.lang.Integer" resultMap="AddressPlus">
+        select address.address_id,province,city,town,no,name,age,height from address
+               left join person on address.address_id = person.address_id
+               where address.address_id=#{addressId};
+    </select>
+</mapper>

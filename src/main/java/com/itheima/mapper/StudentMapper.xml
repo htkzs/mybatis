@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.mapper.StudentMapper">
+
+    <!-- void addStudent(Student student);-->
+    <insert id="addStudent" parameterType="Student">
+        insert into student(id,name,age,sex) values (#{id},#{name},#{age},#{sex});
+    </insert>
+
+    <update id="updateStudent" parameterType="Student">
+        update student set name=#{name},age=#{age},sex=#{sex} where id = #{id}
+    </update>
+    <delete id="deleteStudent" parameterType="java.lang.Integer">
+        delete from student where id=#{id}
+    </delete>
+
+    <!--获取自增的主键值的方法
+     使用useGeneratedKeys="true"开启主键自增
+     mysgl支持自增主键，自增主键值的获取，mybatis也是利用statement.getGenreatedKeys()
+     useGeneratedKeys="true";使用自增主键获取主键值策略
+     keyProperty，指定对应的主键属性，也就是mybatis获取到主键值以后，将这个值封装给javaBean的那个属性中
+    -->
+    <insert id="insertStudent" parameterType="Student" useGeneratedKeys="true" keyProperty="id">
+        insert into student(id,name,age,sex) values (#{id},#{name},#{age},#{sex});
+    </insert>
+    <!--mybatis对所有的null都映射的是原生Jdbc的OTHER类型 测试mysql对插入的OTHER类型的支持-->
+    <insert id="insertStudentNullWithMysql" parameterType="Student">
+        insert into student values (#{id},#{name},#{age},#{sex})
+    </insert>
+
+<!--    <insert id="insertStudentNullWithOracle" parameterType="Student">-->
+<!--        &lt;!&ndash;首先处理Oracle不支持主键自增的情况&ndash;&gt;-->
+<!--        <selectKey keyProperty="id" resultType="int" order="BEFORE">-->
+<!--            select STUDENT_SEQ.nextval from dual;-->
+<!--        </selectKey>-->
+<!--        &lt;!&ndash;当name字段为null时 我们指定他的javaType为NULL&ndash;&gt;-->
+<!--        insert into student(id,name,age,sex) values (#{id},#{name,javaType=NULL},#{age},#{sex})-->
+<!--    </insert>-->
+    <!--测试传递多个参数的情况-->
+    <select id="selectStudentByIdAndName" resultType="com.itheima.entity.Student">
+        select* from student where id=#{id} and name=#{name}
+    </select>
+
+    <!--测试传递的参数为一个map-->
+    <select id="selectByIdAndByName" resultType="com.itheima.entity.Student">
+        select* from student where id=#{id} and name=#{name}
+    </select>
+
+    <select id="selectStudentByIds" resultType="com.itheima.entity.Student">
+        select* from student where id in
+        <foreach collection = "ids" item = "id" open = "(" close = ")" separator = "," >
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="queryStudentByIds" resultType="com.itheima.entity.Student">
+        select* from student where id in (#{list[0]},#{list[1]},#{list[2]})
+    </select>
+
+    <select id="queryStudentByIdsForParam" resultType="com.itheima.entity.Student">
+        select* from student where id in (#{ids[0]},#{ids[1]},#{ids[2]})
+    </select>
+
+    <select id="queryStudentByIdsForArray" resultType="com.itheima.entity.Student">
+        select* from student where id in (#{array[0]},#{array[1]},#{array[2]})
+    </select>
+    <!--查询返回一个Map-->
+    <select id="queryStudentByResultMap" resultType="map">
+        select* from student where id=#{id}
+    </select>
+    <!--查询返回一个Map<Integer,Student> map的key由我们指定-->
+    <select id="queryStudentByResultMapWithKey" resultType="com.itheima.entity.Student">
+        select* from student where id=#{id}
+    </select>
+
+</mapper>

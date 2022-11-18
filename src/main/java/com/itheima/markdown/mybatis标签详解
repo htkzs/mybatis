@@ -1,0 +1,40 @@
+mybatis开启二级缓存的条件
+1. <setting name="cacheEnabled" value="true"/> mybatis默认开启
+2.在UserMapper.xml标签中使用<cache />标签开启
+3.保存的时机提交或者关闭sqlSession就会保存到二级缓存。 sqlSession.close()
+4.实体类必须实现序列化接口
+缓存失效：两次查询之间执行任意的数据库写操作会导致缓存失效。
+缓存查询顺序 先二级缓存-->一级缓存-->数据库
+
+
+mybatis的多数据配置
+1. <!--配置支持多数据库厂商
+      DB_VENDOR VendorDatabaseIdProvider
+      作用就是得到数据库厂商的标识，mybatis就能根据数据库厂商标识来执行不同的sql
+      connection.getDatabaseProductName()
+      -->
+      <databaseIdProvider type="DB_VENDOR">
+          <!--注意数据库的别名为固定值 -->
+          <property name="MySQL" value="mysql"/>
+          <property name="Oracle" value="oracle"/>
+          <property name="SQL Server" value="sqlserver"/>
+      </databaseIdProvider>
+      xml中标识databaseId指定通过那个数据库查询
+      <select id="getUser" resultType="User" parameterType="Integer" databaseId="mysql">
+             select * from user where id= #{userId}
+          </select>
+
+mappers标签的使用:
+ <mappers>
+        <!--sql是通过XML指定的-->
+        <!--
+        <mapper url="file:///var/mappers/AutoMapper.xml"/> 可以通过url指定磁盘目录下的配置文件
+        resource：引用类路径下的配置文件
+        class：注册接口 <mapper class="com.itheima.mapper.UserMapper"/>
+                     1、有sql映射文件，映射文件名必须和接口同名，并且放在与接口同一目录下;
+                     2.基于注解方式 通常使用mapper注册接口
+        批量注册的方式 name直接指定为包名称 注意这种方式必须要求接口的XML文件在同一个包下 如果通过注解则没问题
+        <package name="com.itheima.mapper"/>
+        -->
+        <mapper resource="mapper/UserMapper.xml"/><!-- 注意后缀为。xml的文件路径写法 -->
+ </mappers>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MyBatis初始化配置 -->
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--设置单个别名-->
+<!--    <typeAliases>-->
+<!--        <typeAlias type="com.itheima.entity.User" alias="User"/>-->
+<!--    </typeAliases>-->
+<!--    &lt;!&ndash;批量设置别名 该包下的类名就是别名&ndash;&gt;-->
+    <!--settings标签中的配置为全局配置-->
+    <properties resource="jdbc.properties"/>
+    <settings>
+        <!--开启日志-->
+        <setting name="logImpl" value="LOG4J"/>
+        <!--开启驼峰命名规则-->
+        <setting name="mapUnderscoreToCamelCase" value="true" />
+        <!--mysql默认开启-->
+        <setting name="cacheEnabled" value="true"/>
+        <!--因为mybatis对所有的null都映射的是原生Jdbc的OTHER类型,Oracle不能识别other类型 所以修改为NULL-->
+        <setting name="jdbcTypeForNull" value="NULL"/>
+
+    </settings>
+    <typeAliases>
+        <package name="com.itheima.entity"/>
+    </typeAliases>
+
+    <environments default="development">
+        <!--environments支持配置多个数据库连接信息
+            environment标签必须包含transactionManager：数据库事务的配置 事务类型包含两种 JDBC (JdbcTransactionFactory)| MANAGED (ManagedTransactionFactory) 事务控制最终交给Spring管理
+            自定义事务管理器 只需要实现TransactionFactory接口 type指定为全类名即可
+            org.apache.ibatis.session.Configuration中注册
+                                 dataSource: 数据源类型; UNPOOLED (不是用连接池，每次数据库操作都新创建一个连接 UnpooledDataSourceFactory)|POOLED(PooledDataSourceFactory)|JNDI(JndiDataSourceFactory)
+                                 自定义数据源 实现DataSourceFactory接口，type指定为全类名
+        -->
+        <environment id="oracle">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${orcl.driver}"/>
+                <property name="url" value="${orcl.url}"/>
+                <property name="username" value="${orcl.username}"/>
+                <property name="password" value="${orcl.password}"/>
+            </dataSource>
+        </environment>
+
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${driver}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <!--配置支持多数据库厂商
+    DB_VENDOR VendorDatabaseIdProvider
+    作用就是得到数据库厂商的标识，mybatis就能根据数据库厂商标识来执行不同的sql
+    connection.getDatabaseProductName()
+    -->
+    <databaseIdProvider type="DB_VENDOR">
+        <!--注意数据库的别名为固定值 -->
+        <property name="MySQL" value="mysql"/>
+        <property name="Oracle" value="oracle"/>
+        <property name="SQL Server" value="sqlserver"/>
+    </databaseIdProvider>
+    <mappers>
+        <!--sql是通过XML指定的-->
+        <!--
+        <mapper url="file:///var/mappers/AutoMapper.xml"/> 可以通过url指定磁盘目录下的配置文件
+        resource：引用类路径下的配置文件
+        class：注册接口 <mapper class="com.itheima.mapper.UserMapperAnnotation"/>
+             1、有sql映射文件，映射文件名必须和接口同名，并且放在与接口同一目录下;
+             2.基于注解方式 通常使用mapper注册接口
+        批量注册的方式 name直接指定为包名称 注意这种方式必须要求接口的XML文件在同一个包下 如果通过注解则没问题
+         <package name="com.itheima.mapper"/>
+
+        -->
+        <!--注意后缀为。xml的文件路径写法-->
+        <!--<mapper resource="mapper/UserMapper.xml"/>-->
+        <package name="com.itheima.mapper"/>
+    </mappers>
+
+
+</configuration>

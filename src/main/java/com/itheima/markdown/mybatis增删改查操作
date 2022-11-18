@@ -1,0 +1,44 @@
+mybatis对数据库的写操作必须注意以下几点:
+对于数据库的写操作需要提交会话  使用sqlSession.commit();
+我们也可以设置自动提交 sessionFactory.openSession(true);
+
+* mybatis对数据库的写操作可以有以下返回值 Integer Long Boolean基本类型和包装类型都可以
+* Integer代表受影响的行数 Boolean代表操作是否成功 直接定义在方法上即可 无需在XML中通过 resultType指定
+
+mybatis获得自增的主键值
+ <!--获取自增的主键值的方法
+     使用useGeneratedKeys="true"开启主键自增
+     mysgl支持自增主键，自增主键值的获取，mybatis也是利用statement.getGenreatedKeys()
+     useGeneratedKeys="true";使用自增主键获取主键值策略
+     keyProperty，指定对应的主键属性，也就是mybatis获取到主键值以后，将这个值封装给javaBean的那个属性中
+    -->
+    <insert id="insertStudent" parameterType="Student" useGeneratedKeys="true" keyProperty="id">
+        insert into student(id,name,age,sex) values (#{id},#{name},#{age},#{sex});
+    </insert>
+
+<!-- Oracle不支持自增;Oracle使用序列来模拟自增;
+     每次插入的数据的主键是从序列中拿到的值;如何获取到这个值;-->
+<!--查询oracle数据库插入一条数据，获取到插入数据的主键值-->
+    <insert id="addUser" databaseId="oracle" parameterType="User">
+        <!--keyProperty：将获取到的值保存在实体类的那个字段中
+            order; BEFORE|AFTER
+            BEFORE运行顺序:
+            先运行selectkey查询id的sql;查出id值封装给javaBean的id属性在运行插入的sql;就可以取出id属性对应的值
+            AFTER运行顺序:
+            先运行插入的sql（从序列中取出新值作为id) ;再运行selectKey查询id的sql;
+        -->
+        <selectKey keyProperty="id" resultType="int" order="BEFORE">
+            select USER_SEQ.nextval from dual;
+        </selectKey>
+
+        insert into user(id,name,age) values(#{id},#{name},#{age})
+    </insert>
+
+    同理也可以写为如下形式：
+    <insert id="addUser" databaseId="oracle" parameterType="User">
+            <selectKey keyProperty="id" resultType="int" order="AFTER">
+                select USER_SEQ.currval from dual;
+            </selectKey>
+
+            insert into user(id,name,age) values(USER_SEQ.currval,#{name},#{age})
+    </insert>

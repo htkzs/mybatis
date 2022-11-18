@@ -1,0 +1,108 @@
+create table animals(
+    id int(10) primary key auto_increment,
+    nick_name varchar(10),
+    actual_name varchar(10),
+    age int(10)
+);
+
+insert into animals(id,nick_name,actual_name,age) values(1,'小黑','哈士奇',2),(2,'小花','泰迪',3);
+
+<!--当开启驼峰命名法的时候该方式没有问题-->
+    <select id="getAnimalsById" resultType="com.itheima.entity.Animals">
+        select* from animals where id=#{id}
+    </select>
+    <!--当关闭驼峰命名法则的时候上面的使用方法就不适用
+    1.可以使用起别名的方式
+    2.使用resultMap做字段的映射
+    -->
+使用resultMap做属性与字段的映射 resultType和resultMap不可以同时使用
+<resultMap id="resultAnimal" type="com.itheima.entity.Animals">
+        <id column="id" property="id"/>
+        <result column="nick_name" property="nickName"/>
+        <result column="actual_name" property="actualName"/>
+        <result column="age" property="age"/>
+</resultMap>
+<select id="getAnimalsById" resultMap="resultAnimal">
+        select* from animals where id=#{id}
+</select>
+
+create table person(
+    no int(10) primary key auto_increment,
+    name varchar(10),
+    age int(10),
+    height long,
+    address_id int(10),
+    foreign key(address_id) references address(address_id)
+);
+
+create table address(
+    address_id int(10) primary key not null,
+    province varchar(10),
+    city varchar(10),
+    town varchar(10)
+);
+
+insert into person(no, name, age, height, address_id)
+values(1,'zhangsan',23,1.75,001),(2,'lisi',23,1.85,002);
+insert into address(address_id, province, city, town)
+values (001,'陕西省','宝鸡市','扶风县'),(002,'陕西省','西安市','户县');
+
+<!--使用该方式返现address的值没有手动封装   返回为null-->
+    <select id="queryPersonById" resultType="com.itheima.entity.Person">
+        select* from person,address where person.address_id = address.address_id and no=#{id}
+    </select>
+
+联合查询封装返回值
+ <!--1.使用级联属性封装结果集-->
+    <resultMap id="PersonAndAddressByCascadingProperties" type="com.itheima.entity.Person">
+        <id column="no" property="no"/>
+        <result column="name" property="name"/>
+        <result column="age" property="age"/>
+        <result column="height" property="height"/>
+        <result column="address_id" property="address.addressId"/>
+        <result column="province" property="address.province"/>
+        <result column="city" property="address.city"/>
+        <result column="town" property="address.town"/>
+    </resultMap>
+
+<!--2.使用association定义关联对象的匹配规则-->
+<resultMap id="PersonAndAddress" type="com.itheima.entity.Person">
+        <id column="no" property="no"/>
+        <result column="name" property="name"/>
+        <result column="age" property="age"/>
+        <result column="height" property="height"/>
+        <association property="address" javaType="com.itheima.entity.Address>
+            <id column="address_id" property="addressId"/>
+            <result column="province" property="province"/>
+            <result column="city" property="city"/>
+            <result column="town" property="town"/>
+        </association>
+    </resultMap>
+
+  使用 association进行分步查询
+  <!--分步查询第一步 -->
+      <resultMap id="PersonAndAddressByStep" type="com.itheima.entity.Person">
+          <id column="no" property="no"/>
+          <result column="name" property="name"/>
+          <result column="age" property="age"/>
+          <result column="height" property="height"/>
+          <!--分步查询第二步
+            association定义关联对象的封装规则
+            select:表明当前属性是调用select指定的方法查出的结果，通过namespace.id唯一确定要执行的语句
+
+            column:指定将哪一列的值传给这个方法
+            流程:使用select指定的方法（传入column指定的这列参数的值）查出对象,并封装给property指定的属性
+            -->
+          <association property="address" select="com.itheima.mapper.AddressMapper.queryAddressById" column="address_id">
+              <id column="address_id" property="addressId"/>
+              <result column="province" property="province"/>
+              <result column="city" property="city"/>
+              <result column="town" property="town"/>
+          </association>
+      </resultMap>
+      <select id="queryPersonByIdWithStep" parameterType="integer" resultMap="PersonAndAddressByStep">
+          select no,name,age,height,address_id from person where no=#{id}
+      </select>
+  </mapper>
+
+   延迟加载:
