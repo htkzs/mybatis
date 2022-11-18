@@ -21,4 +21,11 @@ public class Person {
     private Integer age;
     private Long height;
     private Address address;
+
+    public Person(Integer no, String name, Integer age, Long height) {
+        this.no = no;
+        this.name = name;
+        this.age = age;
+        this.height = height;
+    }
 }

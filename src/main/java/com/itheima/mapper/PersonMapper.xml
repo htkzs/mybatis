@@ -61,4 +61,7 @@
     <select id="queryPersonByIdWithStep" parameterType="integer" resultMap="PersonAndAddressByStep">
         select no,name,age,height,address_id from person where no=#{id}
     </select>
+    <select id="queryPersonByAddressId" resultType="com.itheima.entity.Person" parameterType="java.lang.Integer">
+        select no,name,age,height from person where address_id=#{addressId}
+    </select>
 </mapper>

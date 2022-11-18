@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.mapper.DynamicSqlMapper">
+    <update id="updatePersonByConditionBySet">
+    <!--使用set标签可能导致出现多余的逗号 可以使用trim标签做优化-->
+<!--        update person-->
+<!--        <set>-->
+<!--            <if test="name !=null and name!=''">-->
+<!--                name = #{name},-->
+<!--            </if>-->
+<!--            <if test="age !=null">-->
+<!--                age = #{age},-->
+<!--            </if>-->
+<!--            <if test="height !=null">-->
+<!--                height = #{height}-->
+<!--            </if>-->
+<!--            where no=#{no}-->
+<!--        </set>-->
+        update person
+        <trim prefix="set" suffixOverrides=",">
+            <if test="name !=null and name!=''">
+                name = #{name},
+            </if>
+            <if test="age !=null">
+                age = #{age},
+            </if>
+            <if test="height !=null">
+                height = #{height}
+            </if>
+            where no=#{no}
+        </trim>
+    </update>
+
+    <select id="queryPersonByCondition" resultType="com.itheima.entity.Person" parameterType="com.itheima.to.PersonTo">
+        select * from person where
+        <!--遇见特殊符号应该去写转义字符:
+        查询的时候如果某些条件没带可能sql拼装会有问题
+        1、给where后面加上1=1，以后的条件都and xxX
+        2、mybatis使用where标签来将所有的查询条件包括在内
+        mybatis就会将where标签中拼装的sql，多出来的and或者or去掉,where只会去掉前面的and ，如果将and写在 name like #{name} and
+        就会发生错误，所以使用where时将and写在条件前面
+        &&: &amp;   '' : &quot;-->
+        <where>
+            <if test="no!=null">
+                no=#{no}
+            </if>
+            <if test="name != null and name != ''">
+                and name like #{name}
+            </if>
+            <if test="age==23 and height>=172" >
+                and age = #{age}
+            </if>
+        </where>
+    </select>
+    <select id="queryPersonByConditionByTrim" resultType="com.itheima.entity.Person" parameterType="com.itheima.to.PersonTo">
+        select * from person
+        <!--后面多出的and或者or where标签不能解决
+                prefix="":前缀:trim标签体中是整个字符串拼串后的结果。
+                          prefix给拼串后的整个字符串加一个前缀
+                prefixOverrides="":
+                          前缀覆盖:去掉整个字符串前面多余的字符
+                suffix="“:后缀
+                          suffix给拼串后的整个字符串加一个后缀
+                suffixOverrides=""
+                          后缀覆盖:去掉整个字符串后面多余的字符-->
+        <trim prefix="where" suffixOverrides="and">
+            <if test="no!=null">
+                no=#{no} and
+            </if>
+            <if test="name != null and name != ''">
+                name like #{name} and
+            </if>
+            <if test="age==23 and height>=172" >
+                age = #{age}
+            </if>
+        </trim>
+    </select>
+    <!--choose (when, otherwise):分支选择;
+       带了break的swtich-case
+       如果带了id就用id查，如果带了lastName就用lastName查;只会进入其中一个
+   -->
+    <select id="queryPersonByConditionByChoose" resultType="com.itheima.entity.Person" parameterType="com.itheima.to.PersonTo">
+        select * from person
+        <where>
+            <choose>
+                <when test="no != null">
+                    no = #{no}
+                </when>
+                <when test="name!= null and name!=''">
+                    name like #{name}
+                </when>
+                <otherwise>
+                    age = #{age}
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+    <select id="queryPersonWithBatchByIds" resultType="com.itheima.entity.Person" parameterType="java.lang.Integer">
+        select * from person where no in(#{ids[0]},#{ids[1]},#{ids[2]});
+    </select>
+    <!--collection:指定要遍历的集合:
+       list类型的参数会特殊处理封装在map中,map的key就叫list
+       item:将当前遍历出的元素赋值给指定的变量
+       separator :每个元素之间的分隔符
+       open:遍历出所有结果拼接一个开始的字符
+       close:遍历出所有结果拼接一个结束的字符
+       index:索引。
+       遍历list的时候是index就是索引， item就是当前值
+       遍历map的时候index表示的就是map的key. item就是map的值
+       #{变量名}就能取出变量的值也就是当前追历出的元素
+    -->
+    <select id="queryPersonWithBatchByIdsForeach" resultType="com.itheima.entity.Person" parameterType="java.util.Map">
+        select * from person where no in
+        <!--如果对参数没有指定别名时 就必须使用 collection="list"-->
+        <foreach collection="list" item="no" open="(" close=")" separator=",">
+            #{no}
+        </foreach>
+    </select>
+
+    <select id="queryPersonWithBatchByIdsForeachTransformMap" resultType="com.itheima.entity.Person" parameterType="map">
+        select * from person where no in
+        <!--如果对参数没有指定别名时 就必须使用 collection="map"-->
+        <foreach collection="map" item="no" open="(" close=")" separator=",">
+            #{no}
+        </foreach>
+    </select>
+
+
+</mapper>

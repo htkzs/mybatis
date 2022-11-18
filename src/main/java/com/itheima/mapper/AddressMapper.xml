@@ -29,4 +29,36 @@
                left join person on address.address_id = person.address_id
                where address.address_id=#{addressId};
     </select>
+
+
+
+
+    <resultMap id="AddressPlusWithDiscriminator" type="com.itheima.entity.Address">
+        <id column="address_id" property="addressId"/>
+        <result column="province" property="province"/>
+        <result column="city" property="city"/>
+        <result column="town" property="town"/>
+        <!--根据鉴别器 根据条件选择封装地址对应的人员信息
+        如果地址为 宝鸡 就将在该地区的人查询出来
+        如果地址为 西安 不查询该地区的人 对Address就做特殊的封装 保持city和town的信息一样
+        -->
+
+        <discriminator javaType="java.lang.String" column="city">
+            <case value="宝鸡" resultType="com.itheima.entity.Person">
+                <collection property="persons" select="com.itheima.mapper.PersonMapper.queryPersonByAddressId"
+                column="address_id">
+                </collection>
+            </case>
+            <case value="西安" resultType="com.itheima.entity.Person">
+                <id column="address_id" property="addressId"/>
+                <result column="province" property="province"/>
+                <result column="city" property="city"/>
+                <result column="town" property="city"/>
+            </case>
+        </discriminator>
+    </resultMap>
+    <!--通过分步查询Address对应的人员的信息-->
+    <select id="queryAddressByIdWithDiscriminator" resultMap="AddressPlusWithDiscriminator">
+        select address_id,province,city,town from address where address_id=#{addressId}
+    </select>
 </mapper>

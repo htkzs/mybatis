@@ -168,5 +168,29 @@ public class Junit4Test {
             sqlSession.close();
         }
     }
+    /*
+     * @Author Zhonghuan
+     * @Description  测试mybatis的鉴别器
+     * @Date 17:07 2022/11/18
+     * @Param []
+     * @return void
+     **/
+    @Test
+    public void queryAddressByIdWithDiscriminator(){
+        SqlSession sqlSession = null;
+        try {
+            sqlSession = sqlSessionUtils.getSqlSession();
+            AddressMapper mapper = sqlSession.getMapper(AddressMapper.class);
+            //如果查询的address_id为1时 由于对应的 province为 宝鸡 就返回该地址对应的person信息
+            //如果查询的address_id为2时 由于对应的 province为 西安 就不返回该地址对应的person信息 而将地址信息的city和town信息设置为一样
+            Address address = mapper.queryAddressByIdWithDiscriminator(2);
+            System.out.println(address);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            assert sqlSession != null;
+            sqlSession.close();
+        }
+    }
 
 }

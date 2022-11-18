@@ -3,12 +3,16 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/src/main/java/com/itheima/mapper/AddressMapper.xml" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/itheima/mapper/AnimalsMapper.xml" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/src/main/java/com/itheima/mapper/DynamicSqlMapper.xml" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/itheima/mapper/PersonMapper.xml" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/itheima/mapper/StudentMapper.xml" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/com/itheima/mapper/UserMapperAnnotation.java" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/create.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/src/main/resources/address.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/animals.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/src/main/resources/mapper/StudentMapper.xml" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/src/main/resources/mapper/UserMapper.xml" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/person.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/user.sql" dialect="MySQL" />
   </component>
 </project>

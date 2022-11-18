@@ -7,4 +7,6 @@ public interface PersonMapper {
     Person queryPersonById(Integer id);
 
     Person queryPersonByIdWithStep(@Param("id") Integer id);
+
+    Person queryPersonByAddressId(@Param("id") Integer addressId);
 }
