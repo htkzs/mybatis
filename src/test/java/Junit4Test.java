@@ -146,6 +146,12 @@ public class Junit4Test {
             sqlSession.close();
         }
     }
+    /**
+    * @Param :
+    * @Description : 测试包含List元素的封装
+    * @Author : 20609
+    * @Date : 2022/11/18 15:34
+    */
 
     @Test
     public void queryAddressAndPersonPlus(){

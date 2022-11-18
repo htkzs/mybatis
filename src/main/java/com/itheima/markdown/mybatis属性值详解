@@ -105,4 +105,36 @@ values (001,'陕西省','宝鸡市','扶风县'),(002,'陕西省','西安市','�
       </select>
   </mapper>
 
-   延迟加载:
+   延迟加载: 通过分步查询时，延迟加载才有效
+   @Test
+       public void queryPersonAndAddressByStepLazyOut(){
+           SqlSession sqlSession = null;
+           try {
+               sqlSession = sqlSessionUtils.getSqlSession();
+               PersonMapper mapper = sqlSession.getMapper(PersonMapper.class);
+               Person person = mapper.queryPersonByIdWithStep(1);
+               System.out.println(person.getName());
+           } catch (IOException e) {
+               e.printStackTrace();
+           }finally {
+               assert sqlSession != null;
+               sqlSession.close();
+           }
+       }
+
+       在分步查询时如果需要传递多个参数值 可以通过一个map指定
+                 将多列的值封装map传递;
+                       column="{key1=column1,key2=column2}"
+
+       通过fetchType="eager" 指定当前操作的SQL是否执行立即加载 即使全局开启延迟加载。
+
+mybatis的鉴别器
+
+<! -- <discriminator javaType=""></discriminator>
+鉴别器:mybatis可以使用discriminator判断某列的值，然后根据某列的值改变封装行为封装Employee:
+如果查出的是女生:就把部门信息查询出来，否则不查询;
+如果是男生I把last_name这一列的值赋值给email;
+
+
+
+
