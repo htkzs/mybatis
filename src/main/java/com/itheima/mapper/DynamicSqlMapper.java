@@ -28,4 +28,14 @@ public interface DynamicSqlMapper {
      List<Person> queryPersonWithBatchByIdsForeach(List<Integer> ids);
 
      List<Person> queryPersonWithBatchByIdsForeachTransformMap(@Param("map") Map<String, Object> map);
+
+     boolean saveBatchPerson(@Param("persons") List<Person> persons);
+
+     boolean saveBatchPersonForMultiSql(@Param("persons") List<Person> persons);
+
+     boolean saveBatchPersonForMultiSqlWithOracle(@Param("persons") List<Person> list);
+
+     List<Person> MyBatisInnerParameter(Person person);
+
+     List<Person> MyBatisInnerParameterWithBind(Person person);
 }

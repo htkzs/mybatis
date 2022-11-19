@@ -5,7 +5,7 @@
 <mapper namespace="com.itheima.mapper.UserMapper">
 
     <!--开启二级缓存 整合第三方ehcache使用-->
-    <cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
+    <cache type="org.mybatis.caches.ehcache.EhcacheCache" eviction="FIFO" size="2000"/>
 
 
     <select id="getUser" resultType="User" parameterType="Integer" databaseId="mysql">

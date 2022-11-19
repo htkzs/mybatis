@@ -25,4 +25,8 @@ public class Address {
 
     //该地址下包含的所有人的信息
     private List<Person> persons;
+
+    public Address(Integer addressId) {
+        this.addressId = addressId;
+    }
 }

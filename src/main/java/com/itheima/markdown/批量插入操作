@@ -1,0 +1,48 @@
+Oracle不支持 insert into person(no,name,age,height,address_id) values (person_seq.nextval,'smith',25,174,2),
+                                                         (person_seq.nextval,'rose',25,174,2),
+                                                         (person_seq.nextval,'lucy',23,176,2);
+oracle支持如下两种方式的批量插入操作
+begin
+    insert into person(no,name,age,height,address_id) values (person_seq.nextval,'smith',25,174,2);
+    insert into person(no,name,age,height,address_id) values (person_seq.nextval,'rose',25,174,2);
+    insert into person(no,name,age,height,address_id) values (person_seq.nextval,'lucy',23,176,2);
+end;
+
+借助中间表：
+insert into person(no,name,age,height,address_id)
+    select person_seq.nextval,name,age,height,address_id from(
+            select 'test_a_01' name,'test_a_01 'age,'test_a_01' age, 'test_a_01' height,'test_a_01' address_id  from dual
+            union
+            select 'test_a_02' name,'test_a_02 'age,'test_a_02' age, 'test_a_02' height,'test_a_02' address_id  from dual
+            union
+            select 'test_a_02' name,'test_a_02 'age,'test_a_02' age, 'test_a_02' height,'test_a_02' address_id  from dual
+            )
+
+<!--两个内置参数:
+不只是方法传递过来的参数可以被用来判断，取值。。。mybatis默认还有两个内置参数:
+_parameter:代表整个参数
+    单个参数:_parameter就是这个参数
+    多个参数:参数会被封装为一个map; _parameter就是代表这个map
+_databaseId :如果配置了databaseIdProvider标签。
+    _databaseId就是代表当前数据库的别名oracle
+-->
+
+特别注意：若要使用_parameter 方法传递参数时就不能使用@Param起别名
+ <!--List<Person> MyBatisInnerParameter(@Param("person") Person person);-->
+    <select id="MyBatisInnerParameter" resultType="com.itheima.entity.Person" parameterType="com.itheima.entity.Person">
+         <if test="_databaseId == 'mysql'">
+             select* from person
+              <if test="_parameter !=null">
+                  <!--这里的_parameter就是传递过来的person对象 若要使用_parameter 方法传递参数时就不能使用@Param起别名
+                  否则报 org.apache.ibatis.binding.BindingException: Parameter 'name' not found. Available parameters are [person, param1] 异常
+                  -->
+                  where name =#{_parameter.name}
+              </if>
+         </if>
+        <if test="_databaseId == 'oracle'">
+            select* from person
+            <if test="parameter !=null ">
+                where name =#{_parameter.name}
+            </if>
+        </if>
+    </select>

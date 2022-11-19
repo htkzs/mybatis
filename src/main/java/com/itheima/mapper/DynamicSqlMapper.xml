@@ -2,6 +2,27 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.itheima.mapper.DynamicSqlMapper">
+    <!--引入缓存和UserMapper使用的缓存保持一致-->
+    <cache-ref namespace="com.itheima.mapper.UserMapper"/>
+    <!--批量保存方法-->
+    <insert id="saveBatchPerson" parameterType="list">
+        insert into person(no,name,age,height,address_id) values
+        <foreach collection="persons" item="person" separator=",">
+            (#{person.no},#{person.name},#{person.age},#{person.height},#{person.address.addressId})
+        </foreach>
+    </insert>
+    <!--批量插入的第二中方式  每次循坏一个完整的SQL中间用 ; 隔开-->
+    <insert id="saveBatchPersonForMultiSql" parameterType="list">
+        <foreach collection="persons" item="person" separator=";">
+            insert into person(no,name,age,height,address_id) values (#{person.no},#{person.name},#{person.age},#{person.height},#{person.address.addressId})
+        </foreach>
+    </insert>
+    <!--oracle支持的批量插入操作-->
+    <insert id="saveBatchPersonForMultiSqlWithOracle" parameterType="list">
+           <foreach collection="persons" item="person" separator=";" open="begin" close="end;">
+               insert into person(no,name,age,height,address_id) values (person_sql.nextval,#{person.name},#{person.age},#{person.height},#{person.address.addressId})
+           </foreach>
+    </insert>
     <update id="updatePersonByConditionBySet">
     <!--使用set标签可能导致出现多余的逗号 可以使用trim标签做优化-->
 <!--        update person-->
@@ -121,10 +142,67 @@
     <select id="queryPersonWithBatchByIdsForeachTransformMap" resultType="com.itheima.entity.Person" parameterType="map">
         select * from person where no in
         <!--如果对参数没有指定别名时 就必须使用 collection="map"-->
-        <foreach collection="map" item="no" open="(" close=")" separator=",">
+        <foreach collection="map" item="no" open="(" close=")" separator="," index="i">
             #{no}
         </foreach>
     </select>
+    <!--List<Person> MyBatisInnerParameter(@Param("person") Person person);-->
+    <select id="MyBatisInnerParameter" resultType="com.itheima.entity.Person" parameterType="com.itheima.entity.Person">
+        <!-- bind:可以将OGNL表达式的值绑定到一个变量中，方便后来引用这个变量的值-->
+        <bind name="_name" value="'%'+#{name}+'%'"/>
+        <if test="_databaseId == 'mysql'">
+             select* from person
+              <if test="_parameter !=null">
+                  <!--这里的_parameter就是传递过来的person对象 若要使用_parameter 方法传递参数时就不能使用@Param起别名
+                  否则报 org.apache.ibatis.binding.BindingException: Parameter 'name' not found. Available parameters are [person, param1] 异常
+                  -->
+                  where name =#{_parameter.name}
+              </if>
+         </if>
+        <if test="_databaseId == 'oracle'">
+            select* from person
+            <if test="parameter !=null ">
+                where name =#{_parameter.name}
+            </if>
+        </if>
+    </select>
+    <!--使用bind标签进行模糊查询-->
+    <select id="MyBatisInnerParameterWithBind" resultType="com.itheima.entity.Person" parameterType="com.itheima.entity.Person">
+        <!-- bind:可以将OGNL表达式的值绑定到一个变量中，方便后来引用这个变量的值-->
+        <bind name="_name" value="'%'+name+'%'"/>
+        <if test="_databaseId == 'mysql'">
+            select
+            <include refid="columnRows">
+                <property name="columnPrefix" value="helloWorld"/>
+            </include>
+            from person
+            <if test="_parameter !=null">
+                where name like #{_name}
+            </if>
+        </if>
+        <if test="_databaseId == 'oracle'">
+            select* from person
+            <if test="parameter !=null ">
+                where name =#{_parameter.name}
+            </if>
+        </if>
 
+    </select>
+    <!--
+        抽取可重用的sql片段。方便后面引用
+        1、sql抽取:经常将要查询的列名，或者插入用的列名抽取出来方便引用
+        2、include来引用已经抽取的sgl:
+        3、include还可以自定义一些property，sql标签内部就能使用自定义的属性
+        ${prop}
+    -->
+    <sql id="columnRows">
+        <if test="_databaseId == mysql">
+            on,name,age,height
+        </if>
+        <if test="_databaseId == oracle">
+            on,name,age,height
+        </if>
+
+    </sql>
 
 </mapper>
