@@ -15,8 +15,8 @@
     <select id="getUser" resultType="User" parameterType="Integer" databaseId="oracle">
         select id,name,age from user where id= #{userId}
     </select>
-
-    <select id="getAllUser" resultType="User">
+    <!--使用useCache关闭二级缓存 注意只对该条语句有用-->
+    <select id="getAllUser" resultType="User" useCache="false">
         select * from user;
     </select>
 

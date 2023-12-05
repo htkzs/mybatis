@@ -5,4 +5,6 @@ import com.itheima.entity.Animals;
 public interface AnimalsMapper {
 
     Animals getAnimalsById(Integer id);
+
+    Animals getAnimalsByIdWithAliases(Integer id);
 }

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.mapper.AnimalsMapper">
+
+<!--    <resultMap id="resultAnimal" type="com.itheima.entity.Animals">-->
+<!--        <id column="id" property="id"/>-->
+<!--        <result column="nick_name" property="nickName"/>-->
+<!--        <result column="actual_name" property="actualName"/>-->
+<!--        <result column="age" property="age"/>-->
+<!--    </resultMap>-->
+
+    <!--当开启驼峰命名法的时候该方式没有问题-->
+    <select id="getAnimalsById" resultType="com.itheima.entity.Animals">
+        select* from animals where id=#{id}
+    </select>
+
+    <!--当关闭驼峰命名法则的时候上面的使用方法就不适用
+    1.可以使用起别名的方式
+    2.使用resultMap做字段的映射
+    -->
+
+    <!--使用别名的方式建立映射关系  关闭驼峰命名规则-->
+    <select id="getAnimalsByIdWithAliases" resultType="com.itheima.entity.Animals">
+        select id,nick_name as 'nickName',actual_name as 'actualName',age from animals where id=#{id};
+    </select>
+
+</mapper>

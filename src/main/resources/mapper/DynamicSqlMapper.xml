@@ -90,7 +90,7 @@
                 no=#{no} and
             </if>
             <if test="name != null and name != ''">
-                name like #{name} and
+                name like ${name} and
             </if>
             <if test="age==23 and height>=172" >
                 age = #{age}
@@ -171,21 +171,21 @@
         <!-- bind:可以将OGNL表达式的值绑定到一个变量中，方便后来引用这个变量的值-->
         <bind name="_name" value="'%'+name+'%'"/>
         <if test="_databaseId == 'mysql'">
-            select
-            <include refid="columnRows">
+            select no,name,age,height from person
+<!--            <include refid="columnRows">-->
 <!--                <property name="columnPrefix" value="helloWorld"/>-->
-            </include>
-            from person
+<!--            </include>-->
+
             <if test="_parameter !=null">
                 where name like #{_name}
             </if>
         </if>
-<!--        <if test="_databaseId == 'oracle'">-->
-<!--            select* from person-->
-<!--            <if test="parameter !=null ">-->
-<!--                where name =#{_parameter.name}-->
-<!--            </if>-->
-<!--        </if>-->
+        <if test="_databaseId == 'oracle'">
+            select* from person
+            <if test="parameter !=null ">
+                where name =#{_parameter.name}
+            </if>
+        </if>
 
     </select>
     <!--
@@ -196,10 +196,10 @@
         ${prop}
     -->
     <sql id="columnRows">
-        <if test="_databaseId == mysql">
+        <if test="_databaseId == 'mysql'">
             on,name,age,height
         </if>
-        <if test="_databaseId == oracle">
+        <if test="_databaseId == 'oracle'">
             on,name,age,height
         </if>
 

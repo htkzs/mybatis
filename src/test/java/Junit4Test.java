@@ -104,7 +104,7 @@ public class Junit4Test {
     }
     /**
     * @Param :
-    * @Description :  通过分步查询完成量表联查
+    * @Description :  通过分步查询完成两表表联查
     * @Author : 20609
     * @Date : 2022/11/18 13:49
     */
@@ -116,12 +116,14 @@ public class Junit4Test {
             sqlSession = sqlSessionUtils.getSqlSession();
             PersonMapper mapper = sqlSession.getMapper(PersonMapper.class);
             Person person = mapper.queryPersonByIdWithStep(1);
-            System.out.println(person);
+            System.out.println(person.getName());
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
-            assert sqlSession != null;
-            sqlSession.close();
+           if(sqlSession != null){
+               sqlSession.close();
+           }
+
         }
     }
     /**

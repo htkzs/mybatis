@@ -16,10 +16,14 @@
         <setting name="logImpl" value="LOG4J"/>
         <!--开启驼峰命名规则-->
         <setting name="mapUnderscoreToCamelCase" value="true" />
-        <!--mysql默认开启-->
+        <!--mysql默认开启二级缓存-->
         <setting name="cacheEnabled" value="true"/>
         <!--因为mybatis对所有的null都映射的是原生Jdbc的OTHER类型,Oracle不能识别other类型 所以修改为NULL-->
         <setting name="jdbcTypeForNull" value="NULL"/>
+        <!--开启延迟加载开关-->
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <!--开启按需加载开关-->
+        <setting name="aggressiveLazyLoading" value="false"/>
 
     </settings>
     <typeAliases>
@@ -78,8 +82,16 @@
 
         -->
         <!--注意后缀为。xml的文件路径写法-->
-        <!--<mapper resource="mapper/UserMapper.xml"/>-->
-        <package name="com.itheima.mapper"/>
+        <mapper class="com.itheima.mapper.UserMapperAnnotation"/>
+        <mapper resource="mapper/AnimalMapper.xml"/>
+        <mapper resource="mapper/StudentMapper.xml"/>
+        <mapper resource="mapper/AnimalsMapper.xml"/>
+        <mapper resource="mapper/PersonMapper.xml"/>
+        <mapper resource="mapper/DynamicSqlMapper.xml"/>
+        <mapper resource="mapper/AddressMapper.xml"/>
+<!--        <package name="com.itheima.mapper"/>-->
+        <!--<mapper resource="org/mybatis/mapper/interfaces/studentMapper.xml"/>-->
+        <!--<package name="com.itheima.mapper"/>-->
     </mappers>
 
 

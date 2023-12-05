@@ -1,9 +1,6 @@
 package com.itheima.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 /**
  * @ClassName : Person
@@ -15,6 +12,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@Setter @Getter
 public class Person {
     private Integer no;
     private String name;

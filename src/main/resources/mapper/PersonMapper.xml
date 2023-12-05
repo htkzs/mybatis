@@ -2,32 +2,32 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.itheima.mapper.PersonMapper">
     <!--使用级联属性封装结果集-->
-<!--    <resultMap id="PersonAndAddressByCascadingProperties" type="com.itheima.entity.Person">-->
-<!--        <id column="no" property="no"/>-->
-<!--        <result column="name" property="name"/>-->
-<!--        <result column="age" property="age"/>-->
-<!--        <result column="height" property="height"/>-->
-<!--        <result column="address_id" property="address.addressId"/>-->
-<!--        <result column="province" property="address.province"/>-->
-<!--        <result column="city" property="address.city"/>-->
-<!--        <result column="town" property="address.town"/>-->
-<!--    </resultMap>-->
+    <resultMap id="PersonAndAddressByCascadingProperties" type="com.itheima.entity.Person">
+        <id column="no" property="no"/>
+        <result column="name" property="name"/>
+        <result column="age" property="age"/>
+        <result column="height" property="height"/>
+        <result column="address_id" property="address.addressId"/>
+        <result column="province" property="address.province"/>
+        <result column="city" property="address.city"/>
+        <result column="town" property="address.town"/>
+    </resultMap>
 
 
     <resultMap id="PersonAndAddress" type="com.itheima.entity.Person">
         <id column="no" property="no"/>
         <result column="name" property="name"/>
         <result column="age" property="age"/>
-        <result column="height" property="height"/>v
+        <result column="height" property="height"/>
         <association property="address" javaType="com.itheima.entity.Address">
-            <result column="address_id" property="addressId"/>
+            <id column="address_id" property="addressId"/>
             <result column="province" property="province"/>
             <result column="city" property="city"/>
             <result column="town" property="town"/>
         </association>
     </resultMap>
     <!--使用该方式返现address的值没有被封装为null-->
-    <select id="queryPersonById" resultMap="PersonAndAddress">
+    <select id="queryPersonById" resultMap="PersonAndAddressByCascadingProperties">
         select* from person,address where person.address_id = address.address_id and no=#{id}
     </select>
 
@@ -47,21 +47,45 @@
           将多列的值封装map传递;
                 column="{key1=column1,key2=column2}"
 
-          通过fetchType="eager" 指定当前操作的SQL是否执行立即加载 即使全局开启延迟加载。
+          通过fetchType="eager" 指定当前操作的SQL是否执行立即加载 即使全局开启延迟加载。fetchType="eager" fetchType="lazy"
 
 
           -->
-        <association property="address" select="com.itheima.mapper.AddressMapper.queryAddressById" column="address_id" fetchType="eager">
+        <association property="address" select="com.itheima.mapper.AddressMapper.queryAddressById" column="address_id">
             <id column="address_id" property="addressId"/>
             <result column="province" property="province"/>
             <result column="city" property="city"/>
             <result column="town" property="town"/>
         </association>
     </resultMap>
-    <select id="queryPersonByIdWithStep" parameterType="integer" resultMap="PersonAndAddressByStep">
+    <select id="queryPersonByIdWithStep" parameterType="java.lang.Integer" resultMap="PersonAndAddressByStep">
         select no,name,age,height,address_id from person where no=#{id}
     </select>
     <select id="queryPersonByAddressId" resultType="com.itheima.entity.Person" parameterType="java.lang.Integer">
         select no,name,age,height from person where address_id=#{addressId}
     </select>
+
+    <select id="queryPersonByArray" resultType="com.itheima.entity.Person" parameterType="int[]">
+        select no,name,age,height from person where no in
+        <if test = "array.length>0 and array!=null">
+            <foreach collection="array" open="(" close=")" separator="," item="no">
+                #{no}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="queryPersonByArrayWithWhere" resultType="com.itheima.entity.Person" parameterType="int[]">
+        select no,name,age,height from person
+        <where>
+            <if test = "array.length>0 and array!=null">
+                <foreach collection="array" open="no in(" close=")" separator="," item="no">
+                    #{no}
+                </foreach>
+            </if>
+        </where>
+
+    </select>
+
+
+
 </mapper>

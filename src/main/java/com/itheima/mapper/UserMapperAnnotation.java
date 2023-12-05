@@ -1,6 +1,7 @@
 package com.itheima.mapper;
 
 import com.itheima.entity.User;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 /**
